@@ -18,11 +18,13 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.baidu.ueditor.define.QiNiuCom;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.qiniu.common.QiniuException;
 import com.qiniu.common.Zone;
 import com.qiniu.http.Response;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.UploadManager;
+import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.UrlSafeBase64;
 
 import net.sf.json.JSONObject;
@@ -72,7 +74,12 @@ public class QiniuHelper {
 	    	UploadManager uploadManager = new UploadManager(config);
 	    	
 	    	//上传文件
-	    	Response res = uploadManager.put(file, key, token);
+	    	Response response = uploadManager.put(file, key, token);
+	    	 //解析上传成功的结果
+	        DefaultPutRet putRet = new Gson().fromJson(response.bodyString(), DefaultPutRet.class);
+	        System.out.println("上传完毕！");
+	        System.out.println(putRet.key);
+	        System.out.println(putRet.hash);
     	} catch (Exception e) {
     		return "";
     	}
@@ -96,9 +103,6 @@ public class QiniuHelper {
  		String thumbSpace = saveSpace + "thumb/";
  		String thumbKey = UrlSafeBase64.encodeToString((mainSpace + ":" + thumbSpace + fileName).getBytes());
  		System.out.println(thumbKey);
- 		String thumbnailSpace = saveSpace + "thumbnail/";
- 		String thumbnailKey = UrlSafeBase64.encodeToString((mainSpace + ":" + thumbnailSpace + fileName).getBytes());
- 		System.out.println(thumbnailKey);
  		 String str_Pops = "imageView2/1/w/" + maxSize + "/h/" + maxSize +
  		 "/format/png|saveas/" + thumbKey;// 此处可追加预处理命令
 // 		String str_Pops = ""; // 需要保存的指令，指定文件key时
