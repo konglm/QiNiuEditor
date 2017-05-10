@@ -1,7 +1,9 @@
 package com.goldeneyes.qiniu;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -10,6 +12,7 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 
+import javax.imageio.ImageIO;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -27,6 +30,7 @@ import com.qiniu.storage.UploadManager;
 import com.qiniu.storage.model.DefaultPutRet;
 import com.qiniu.util.UrlSafeBase64;
 
+import net.coobird.thumbnailator.Thumbnails;
 import net.sf.json.JSONObject;
 import sun.misc.BASE64Encoder;
 
@@ -44,15 +48,43 @@ public class QiniuHelper {
     
     public static void main(String[] args) {
 		//获取token
-    	String tokenResult = getToken("pc/", "test2.jpg");
-    	
-    	JSONObject jsonToken = JSONObject.fromObject(tokenResult);
-    	JSONObject jsonData = jsonToken.getJSONObject("Data");
-    	String token = jsonData.getString("Token");
-    	String key = jsonData.getString("Key");
-    	
-    	System.out.println("token == " + token);
-    	System.out.println("key == " + key);
+//    	String tokenResult = getToken("pc/", "test2.jpg");
+//    	
+//    	JSONObject jsonToken = JSONObject.fromObject(tokenResult);
+//    	JSONObject jsonData = jsonToken.getJSONObject("Data");
+//    	String token = jsonData.getString("Token");
+//    	String key = jsonData.getString("Key");
+//    	
+//    	System.out.println("token == " + token);
+//    	System.out.println("key == " + key);
+    	String filePath = "E:\\jing.jpg";
+    	String fileToPath = "E:\\jing_s.jpg";
+    	File file = new File(filePath);
+    	int width = 0;
+    	int height = 0;
+    	try {
+			BufferedImage sourceImg =ImageIO.read(new FileInputStream(file));
+			width = sourceImg.getWidth();
+			height = sourceImg.getHeight();
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+    	System.out.println(width);
+    	System.out.println(height);
+    	try {
+    		if((width > 1024) || (height > 1024)){
+    			Thumbnails.of(filePath).size(1024,1024).toFile(fileToPath);
+    		} else {
+    			Thumbnails.of(filePath).size(width,height).toFile(fileToPath);
+    		}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
     
     /**
@@ -104,7 +136,7 @@ public class QiniuHelper {
  		String thumbKey = UrlSafeBase64.encodeToString((mainSpace + ":" + thumbSpace + fileName).getBytes());
  		System.out.println(thumbKey);
  		 String str_Pops = "imageView2/1/w/" + maxSize + "/h/" + maxSize +
- 		 "/format/png|saveas/" + thumbKey;// 此处可追加预处理命令
+ 		 "/format/png|saveas/" + thumbKey;// 此处可追加预处理命令，图片在上传原图的时候，一起上传缩略图
 // 		String str_Pops = ""; // 需要保存的指令，指定文件key时
  								// 一样不需要添加第一级前缀名，接口程序会处理
  		String str_NotifyUrl = "";// 通知页面地址
